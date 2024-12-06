@@ -1,4 +1,4 @@
-package com.techyourchance.architecture
+package com.techyourchance.architecture.screens
 
 import android.os.Bundle
 import android.text.Html
@@ -69,6 +69,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
+import com.techyourchance.architecture.R
+import com.techyourchance.architecture.common.database.FavoriteQuestionDao
+import com.techyourchance.architecture.common.database.MyRoomDatabase
+import com.techyourchance.architecture.common.networking.StackoverflowApi
+import com.techyourchance.architecture.question.FavoriteQuestion
+import com.techyourchance.architecture.question.QuestionSchema
+import com.techyourchance.architecture.question.QuestionWithBodySchema
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -157,16 +164,17 @@ sealed class Route(val routeName: String, val bottomTab: BottomTab) {
     data object MainTab: Route("mainTab", BottomTab.Main)
     data object FavoritesTab: Route("favoritesTab", BottomTab.Favorites)
     data object QuestionsListScreen: Route("questionsList", BottomTab.Main)
-    data object QuestionDetailsScreen: Route("questionDetails/{questionId}/{questionTitle}", BottomTab.Main)
+    data object QuestionDetailsScreen: Route("questionDetails/{questionId}/{questionTitle}",
+        BottomTab.Main)
     data object FavoriteQuestionsScreen: Route("favorites", BottomTab.Favorites)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTopAppBar(
-    favoriteQuestionDao: FavoriteQuestionDao,
-    currentNavController: NavHostController,
-    parentNavController: NavHostController,
+        favoriteQuestionDao: FavoriteQuestionDao,
+        currentNavController: NavHostController,
+        parentNavController: NavHostController,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -241,7 +249,8 @@ fun MyTopAppBar(
                             if (isFavoriteQuestion) {
                                 favoriteQuestionDao.delete(questionIdAndTitle.first)
                             } else {
-                                favoriteQuestionDao.upsert(FavoriteQuestion(questionIdAndTitle.first, questionIdAndTitle.second))
+                                favoriteQuestionDao.upsert(
+                                    FavoriteQuestion(questionIdAndTitle.first, questionIdAndTitle.second))
                             }
                         }
                     }
@@ -319,11 +328,11 @@ fun MyBottomTabsBar(parentController: NavController) {
 
 @Composable
 private fun MyContent(
-    padding: PaddingValues,
-    parentNavController: NavHostController,
-    stackoverflowApi: StackoverflowApi,
-    favoriteQuestionDao: FavoriteQuestionDao,
-    currentNavController: MutableState<NavHostController>,
+        padding: PaddingValues,
+        parentNavController: NavHostController,
+        stackoverflowApi: StackoverflowApi,
+        favoriteQuestionDao: FavoriteQuestionDao,
+        currentNavController: MutableState<NavHostController>,
 ) {
     Surface(
         modifier = Modifier
@@ -391,8 +400,8 @@ private fun MyContent(
 
 @Composable
 fun FavoriteQuestionsScreen(
-    favoriteQuestionDao: FavoriteQuestionDao,
-    navController: NavHostController,
+        favoriteQuestionDao: FavoriteQuestionDao,
+        navController: NavHostController,
 ) {
     val favorites = favoriteQuestionDao.observe().collectAsState(initial = listOf())
 
@@ -443,9 +452,9 @@ fun FavoriteQuestionsScreen(
 
 @Composable
 fun QuestionsListScreen(
-    stackoverflowApi: StackoverflowApi,
-    onQuestionClicked: (String, String) -> Unit,
-    modifier: Modifier = Modifier,
+        stackoverflowApi: StackoverflowApi,
+        onQuestionClicked: (String, String) -> Unit,
+        modifier: Modifier = Modifier,
 ) {
 
     var questions by remember { mutableStateOf<List<QuestionSchema>>(listOf()) }
@@ -510,10 +519,10 @@ fun QuestionItem(
 
 @Composable
 fun QuestionDetailsScreen(
-    questionId: String,
-    stackoverflowApi: StackoverflowApi,
-    favoriteQuestionDao: FavoriteQuestionDao,
-    navController: NavHostController,
+        questionId: String,
+        stackoverflowApi: StackoverflowApi,
+        favoriteQuestionDao: FavoriteQuestionDao,
+        navController: NavHostController,
 ) {
     var questionDetails by remember { mutableStateOf<QuestionWithBodySchema?>(null) }
     var isError by remember { mutableStateOf(false) }
