@@ -72,7 +72,8 @@ fun MyTopAppBar(
                                 favoriteQuestionDao.delete(questionIdAndTitle.first)
                             } else {
                                 favoriteQuestionDao.upsert(
-                                    FavoriteQuestion(questionIdAndTitle.first, questionIdAndTitle.second))
+                                    FavoriteQuestion(questionIdAndTitle.first, questionIdAndTitle.second)
+                                )
                             }
                         }
                     }
