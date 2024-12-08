@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,15 +21,17 @@ import com.techyourchance.architecture.screens.common.composable.QuestionItem
 
 @Composable
 fun QuestionsListScreen(
-        stackoverflowApi: StackoverflowApi,
+        presenter: QuestionListPresenter,
         onQuestionClicked: (String, String) -> Unit,
         modifier: Modifier = Modifier,
 ) {
-
-    var questions by remember { mutableStateOf<List<QuestionSchema>>(listOf()) }
+    var questions = presenter.lastActiveQuestions.collectAsState()
 
     LaunchedEffect(Unit) {
-        questions = stackoverflowApi.fetchLastActiveQuestions(20)!!.questions
+        if(questions.value.isEmpty())
+        {
+            presenter.fetchLastActiveQuestions()
+        }
     }
 
     LazyColumn(
@@ -38,14 +41,14 @@ fun QuestionsListScreen(
         verticalArrangement = Arrangement.spacedBy(20.dp),
         contentPadding = PaddingValues(top = 10.dp, bottom = 10.dp)
     ) {
-        items(questions.size) { index ->
-            val question = questions[index]
+        items(questions.value.size) { index ->
+            val question = questions.value[index]
             QuestionItem(
                 questionId = question.id,
                 questionTitle = question.title,
                 onQuestionClicked = { onQuestionClicked(question.id, question.title) },
             )
-            if (index < questions.size - 1) {
+            if (index < questions.value.size - 1) {
                 HorizontalDivider(
                     modifier = Modifier
                         .padding(top = 20.dp),
