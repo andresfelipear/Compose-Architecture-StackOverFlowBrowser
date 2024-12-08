@@ -19,10 +19,10 @@ import com.techyourchance.architecture.screens.common.composable.QuestionItem
 
 @Composable
 fun FavoriteQuestionsScreen(
-        favoriteQuestionDao: FavoriteQuestionDao,
+        favoriteQuestionsPresenter: FavoriteQuestionsPresenter,
         onQuestionClicked: (String, String) -> Unit,
 ) {
-    val favorites = favoriteQuestionDao.observe().collectAsState(initial = listOf())
+    val favorites = favoriteQuestionsPresenter.favoriteQuestions.collectAsState(initial = listOf())
 
     if (favorites.value.isNotEmpty()) {
         LazyColumn(

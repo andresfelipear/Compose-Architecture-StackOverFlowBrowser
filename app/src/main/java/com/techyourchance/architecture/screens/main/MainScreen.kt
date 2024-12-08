@@ -26,6 +26,7 @@ import com.techyourchance.architecture.common.database.FavoriteQuestionDao
 import com.techyourchance.architecture.common.networking.StackoverflowApi
 import com.techyourchance.architecture.screens.Route
 import com.techyourchance.architecture.screens.ScreensNavigator
+import com.techyourchance.architecture.screens.favoritequestions.FavoriteQuestionsPresenter
 import com.techyourchance.architecture.screens.favoritequestions.FavoriteQuestionsScreen
 import com.techyourchance.architecture.screens.questiondetails.QuestionDetailsScreen
 import com.techyourchance.architecture.screens.questionslist.QuestionListPresenter
@@ -129,6 +130,10 @@ private fun MainScreenContent(
         val presenter = remember {
             QuestionListPresenter()
         }
+
+        val favoriteQuestionsPresenter = remember {
+            FavoriteQuestionsPresenter(favoriteQuestionDao = favoriteQuestionDao)
+        }
         NavHost(
             modifier = Modifier.fillMaxSize(),
             navController = parentNavController,
@@ -177,7 +182,7 @@ private fun MainScreenContent(
                 ) {
                     composable(route = Route.FavoriteQuestionsScreen.routeName) {
                         FavoriteQuestionsScreen(
-                            favoriteQuestionDao = favoriteQuestionDao,
+                            favoriteQuestionsPresenter = favoriteQuestionsPresenter,
                             onQuestionClicked = { favoriteQuestionId, favoriteQuestionTitle ->
                                 screensNavigator.toRoute(Route.QuestionDetailsScreen(favoriteQuestionId, favoriteQuestionTitle))
                             }
