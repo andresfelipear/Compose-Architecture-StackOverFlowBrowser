@@ -48,7 +48,7 @@ fun MainScreen(
     val isRootRoute = screensNavigator.isRootRoute.collectAsState()
 
     val isShowFavoriteButton = screensNavigator.currentRoute.map{ route->
-        route is Route.QuestionsListScreen
+        route is Route.QuestionDetailsScreen
     }.collectAsState(initial = false)
 
     val questionIdAndTitle = remember(currentRoute.value) {
@@ -128,15 +128,17 @@ private fun MainScreenContent(
         NavHost(
             modifier = Modifier.fillMaxSize(),
             navController = parentNavController,
+            startDestination = Route.MainTab.routeName,
             enterTransition = { fadeIn(animationSpec = tween(200)) },
             exitTransition = { fadeOut(animationSpec = tween(200)) },
-            startDestination = Route.MainTab.routeName,
         ) {
             composable(route = Route.MainTab.routeName) {
                 val mainNestedNavController = rememberNavController()
                 screensNavigator.setNestedNavController(mainNestedNavController)
-                NavHost(navController = mainNestedNavController,
-                    startDestination = Route.QuestionsListScreen.routeName) {
+                NavHost(
+                    navController = mainNestedNavController,
+                    startDestination = Route.QuestionsListScreen.routeName
+                ) {
                     composable(route = Route.QuestionsListScreen.routeName) {
                         QuestionsListScreen(
                             stackoverflowApi = stackoverflowApi,
@@ -146,14 +148,19 @@ private fun MainScreenContent(
                         )
                     }
                     composable(route = Route.QuestionDetailsScreen().routeName) {
-                        QuestionDetailsScreen(
-                            questionId = (screensNavigator.currentRoute.collectAsState().value as Route.QuestionDetailsScreen).questionId,
-                            stackoverflowApi = stackoverflowApi,
-                            favoriteQuestionDao = favoriteQuestionDao,
-                            onError = {
-                                screensNavigator.navigateBack()
+                        val routeState by screensNavigator.currentRoute.collectAsState()
+                        val questionDetailsRoute = routeState as? Route.QuestionDetailsScreen
+                            val questionId = remember {
+                                (screensNavigator.currentRoute.value as Route.QuestionDetailsScreen).questionId
                             }
-                        )
+                            QuestionDetailsScreen(
+                                questionId = questionId,
+                                stackoverflowApi = stackoverflowApi,
+                                favoriteQuestionDao = favoriteQuestionDao,
+                                onError = {
+                                    screensNavigator.navigateBack()
+                                }
+                            )
                     }
                 }
 
@@ -162,8 +169,10 @@ private fun MainScreenContent(
             composable(route = Route.FavoritesTab.routeName) {
                 val favoriteNestedNavController = rememberNavController()
                 screensNavigator.setNestedNavController(favoriteNestedNavController)
-                NavHost(navController = favoriteNestedNavController,
-                    startDestination = Route.FavoriteQuestionsScreen.routeName) {
+                NavHost(
+                    navController = favoriteNestedNavController,
+                    startDestination = Route.FavoriteQuestionsScreen.routeName
+                ) {
                     composable(route = Route.FavoriteQuestionsScreen.routeName) {
                         FavoriteQuestionsScreen(
                             favoriteQuestionDao = favoriteQuestionDao,
@@ -173,8 +182,11 @@ private fun MainScreenContent(
                         )
                     }
                     composable(route = Route.QuestionDetailsScreen().routeName) {
+                        val questionId = remember {
+                            (screensNavigator.currentRoute.value as Route.QuestionDetailsScreen).questionId
+                        }
                         QuestionDetailsScreen(
-                            questionId = (screensNavigator.currentRoute.collectAsState().value as Route.QuestionDetailsScreen).questionId,
+                            questionId = questionId,
                             stackoverflowApi = stackoverflowApi,
                             favoriteQuestionDao = favoriteQuestionDao,
                             onError = {

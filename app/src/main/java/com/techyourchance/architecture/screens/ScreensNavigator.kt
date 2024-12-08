@@ -1,6 +1,8 @@
 package com.techyourchance.architecture.screens
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -10,11 +12,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import okio.ByteString.Companion.decodeBase64
 
 class ScreensNavigator
 {
-
     private val scope = CoroutineScope(Dispatchers.Main.immediate)
+
     private lateinit var parentNavController: NavHostController
     private lateinit var nestedNavController: NavHostController
 
@@ -68,17 +71,18 @@ class ScreensNavigator
                     else -> throw RuntimeException("unsupported route $routeName")
                 }
                 Pair(route, backStackEntry.arguments)
-            }.collect({ (route) ->
+            }.collect { (route) ->
                 currentRoute.value = route
                 isRootRoute.value = route == Route.QuestionsListScreen
-            })
+                println("Updated currentRoute: $route, isRootRoute: ${isRootRoute.value}")
+            }
         }
     }
 
     fun navigateBack()
     {
-        if(!nestedNavController.popBackStack())
-        {
+        println("navigateBack")
+        if(!nestedNavController.popBackStack()) {
             parentNavController.popBackStack()
         }
     }
@@ -89,16 +93,27 @@ class ScreensNavigator
             BottomTab.Favorites -> Route.FavoritesTab
             BottomTab.Main -> Route.MainTab
         }
-        parentNavController.navigate(route.routeName) {
-            parentNavController.graph.startDestinationRoute?.let { startRoute ->
-                popUpTo(startRoute) {
-                    saveState = true
-                }
-            }
-            launchSingleTop = true
-            restoreState = true
-        }
 
+        println("to tab: ${route.routeName}")
+
+        val destinationExists = parentNavController.graph.findNode(route.routeName) != null
+
+        if(destinationExists)
+        {
+            parentNavController.navigate(route.routeName) {
+                parentNavController.graph.startDestinationRoute?.let { startRoute ->
+                    println("startRoute: $startRoute")
+                    popUpTo(startRoute) {
+                        println("popUpTo: $startRoute")
+                        saveState = true
+                    }
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }else{
+            Log.e("Navigation", "Destination route does not exist: ${route.routeName}")
+        }
     }
 
     fun toRoute(route: Route)
