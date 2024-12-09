@@ -1,7 +1,7 @@
 package com.techyourchance.architecture.question
 
 import com.techyourchance.architecture.common.database.FavoriteQuestionDao
-import com.techyourchance.architecture.common.networking.StackoverflowApi
+import com.techyourchance.architecture.networking.StackoverflowApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -14,7 +14,7 @@ class ObserveQuestionDetailsUseCase(
     private val favoriteQuestionDao: FavoriteQuestionDao,
 ) {
     sealed class QuestionDetailsResult {
-        data class Success(val questionDetails: QuestionWithBodySchema, val isFavorite: Boolean) : QuestionDetailsResult()
+        data class Success(val questionDetails: QuestionWithBody) : QuestionDetailsResult()
         data object Error : QuestionDetailsResult()
     }
 
@@ -27,7 +27,11 @@ class ObserveQuestionDetailsUseCase(
                 flow2 = favoriteQuestionDao.observeById(questionId),
             ) { questionDetails, favoriteQuestion ->
                 if(questionDetails != null && questionDetails.questions.isNotEmpty()) {
-                    QuestionDetailsResult.Success(questionDetails.questions[0], favoriteQuestion != null)
+                    QuestionDetailsResult.Success(
+                        questionDetails.questions[0].run {
+                        QuestionWithBody(id, title, body, favoriteQuestion != null)
+                    }
+                    )
                 } else {
                     QuestionDetailsResult.Error
                 }
