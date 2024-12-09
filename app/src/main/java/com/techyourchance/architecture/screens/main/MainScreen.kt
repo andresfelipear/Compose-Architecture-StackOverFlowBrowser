@@ -27,6 +27,7 @@ import com.techyourchance.architecture.screens.Route
 import com.techyourchance.architecture.screens.ScreensNavigator
 import com.techyourchance.architecture.screens.favoritequestions.FavoriteQuestionsPresenter
 import com.techyourchance.architecture.screens.favoritequestions.FavoriteQuestionsScreen
+import com.techyourchance.architecture.screens.questiondetails.QuestionDetailsPresenter
 import com.techyourchance.architecture.screens.questiondetails.QuestionDetailsScreen
 import com.techyourchance.architecture.screens.questionslist.QuestionListPresenter
 import com.techyourchance.architecture.screens.questionslist.QuestionsListScreen
@@ -133,6 +134,20 @@ private fun MainScreenContent(
         val favoriteQuestionsPresenter = remember {
             FavoriteQuestionsPresenter(favoriteQuestionDao = favoriteQuestionDao)
         }
+
+        val questionDetailsPresenter1 = remember {
+            QuestionDetailsPresenter(
+                stackoverflowApi = stackoverflowApi,
+                favoriteQuestionDao = favoriteQuestionDao,
+            )
+        }
+
+        val questionDetailsPresenter2 = remember {
+            QuestionDetailsPresenter(
+                stackoverflowApi = stackoverflowApi,
+                favoriteQuestionDao = favoriteQuestionDao,
+            )
+        }
         NavHost(
             modifier = Modifier.fillMaxSize(),
             navController = parentNavController,
@@ -160,9 +175,8 @@ private fun MainScreenContent(
                                 (screensNavigator.currentRoute.value as Route.QuestionDetailsScreen).questionId
                             }
                             QuestionDetailsScreen(
+                                presenter = questionDetailsPresenter1,
                                 questionId = questionId,
-                                stackoverflowApi = stackoverflowApi,
-                                favoriteQuestionDao = favoriteQuestionDao,
                                 onError = {
                                     screensNavigator.navigateBack()
                                 }
@@ -192,9 +206,8 @@ private fun MainScreenContent(
                             (screensNavigator.currentRoute.value as Route.QuestionDetailsScreen).questionId
                         }
                         QuestionDetailsScreen(
+                            presenter = questionDetailsPresenter2,
                             questionId = questionId,
-                            stackoverflowApi = stackoverflowApi,
-                            favoriteQuestionDao = favoriteQuestionDao,
                             onError = {
                                 screensNavigator.navigateBack()
                             }
