@@ -1,5 +1,7 @@
 package com.techyourchance.architecture.screens.questiondetails
 
+import android.util.Log
+import androidx.lifecycle.ViewModel
 import com.techyourchance.architecture.common.database.FavoriteQuestionDao
 import com.techyourchance.architecture.common.networking.StackoverflowApi
 import com.techyourchance.architecture.question.QuestionWithBodySchema
@@ -10,10 +12,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
-class QuestionDetailsPresenter(
+class QuestionDetailsViewModel(
     private val stackoverflowApi: StackoverflowApi,
     private val favoriteQuestionDao: FavoriteQuestionDao,
-) {
+): ViewModel() {
     sealed class QuestionDetailsResult {
         data object None : QuestionDetailsResult()
         data class Success(val questionDetails: QuestionWithBodySchema, val isFavorite: Boolean) :
@@ -44,5 +46,10 @@ class QuestionDetailsPresenter(
                 questionDetails.value = it
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.i("QuestionDetailsViewModel", "onCleared")
     }
 }

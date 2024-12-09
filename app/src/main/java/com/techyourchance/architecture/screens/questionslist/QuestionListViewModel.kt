@@ -1,5 +1,6 @@
 package com.techyourchance.architecture.screens.questionslist
 
+import androidx.lifecycle.ViewModel
 import com.techyourchance.architecture.BuildConfig
 import com.techyourchance.architecture.common.networking.StackoverflowApi
 import com.techyourchance.architecture.question.QuestionSchema
@@ -11,7 +12,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
-class QuestionListPresenter {
+class QuestionListViewModel: ViewModel() {
 
     private val retrofit by lazy {
         val httpClient = OkHttpClient.Builder().run {
@@ -36,11 +37,23 @@ class QuestionListPresenter {
 
     val lastActiveQuestions = MutableStateFlow<List<QuestionSchema>>(emptyList())
 
-    suspend fun fetchLastActiveQuestions() {
+    private var lastNetworkRequestNano = 0L
 
+    suspend fun fetchLastActiveQuestions(forceUpdate: Boolean = false) {
         withContext(Dispatchers.Main.immediate) {
-            val questions = stackoverflowApi.fetchLastActiveQuestions(20)!!.questions
-            lastActiveQuestions.value = questions
+            if(forceUpdate || hasEnoughTimePassed()){
+                lastNetworkRequestNano = System.nanoTime()
+                val questions = stackoverflowApi.fetchLastActiveQuestions(20)!!.questions
+                lastActiveQuestions.value = questions
+            }
         }
+    }
+
+    private fun hasEnoughTimePassed(): Boolean {
+        return System.nanoTime() - lastNetworkRequestNano > THROTTLE_TIME_MILLIS * 1_000_000
+    }
+
+    companion object{
+        const val THROTTLE_TIME_MILLIS = 5000L
     }
 }
