@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class QuestionDetailsPresenter(
     private val stackoverflowApi: StackoverflowApi,
@@ -23,24 +24,19 @@ class QuestionDetailsPresenter(
         data object Error : QuestionDetailsResult()
     }
 
-    private val scope = CoroutineScope(Dispatchers.Main.immediate)
-
     val questionDetails = MutableStateFlow<QuestionDetailsResult>(QuestionDetailsResult.None)
 
-    fun fetchQuestionDetails(questionId: String) {
-
-        scope.launch {
+    suspend fun fetchQuestionDetails(questionId: String) {
+        withContext(Dispatchers.Main.immediate){
             combine(
                 flow = flow {
                     emit(stackoverflowApi.fetchQuestionDetails(questionId))
                 },
                 flow2 = favoriteQuestionDao.observeById(questionId),
             ) { questionDetails, favoriteQuestion ->
-                if(questionDetails != null && questionDetails.questions.isNotEmpty()){
-                    QuestionDetailsResult.Success(
-                        questionDetails.questions[0],
-                        favoriteQuestion != null
-                    )
+                if(questionDetails != null && questionDetails.questions.isNotEmpty()) {
+                    QuestionDetailsResult.Success(questionDetails.questions[0],
+                        favoriteQuestion != null)
                 } else {
                     QuestionDetailsResult.Error
                 }
