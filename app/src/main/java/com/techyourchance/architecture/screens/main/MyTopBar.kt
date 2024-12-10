@@ -18,19 +18,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.techyourchance.architecture.R
-import com.techyourchance.architecture.common.database.FavoriteQuestionDao
-import com.techyourchance.architecture.question.FavoriteQuestion
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTopAppBar(
-        favoriteQuestionDao: FavoriteQuestionDao,
         isRootRoute: Boolean,
         isShowFavoriteButton: Boolean,
-        questionIdAndTitle: Pair<String, String>,
         onBackClicked: () -> Unit,
-        isFavoriteQuestion: Boolean
+        isFavoriteQuestion: Boolean,
+        onToggleFavoriteClicked: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -66,17 +62,7 @@ fun MyTopAppBar(
         actions = {
             if (isShowFavoriteButton) {
                 IconButton(
-                    onClick = {
-                        scope.launch {
-                            if (isFavoriteQuestion) {
-                                favoriteQuestionDao.delete(questionIdAndTitle.first)
-                            } else {
-                                favoriteQuestionDao.upsert(
-                                    FavoriteQuestion(questionIdAndTitle.first, questionIdAndTitle.second)
-                                )
-                            }
-                        }
-                    }
+                    onClick = onToggleFavoriteClicked
                 ) {
                     Icon(
                         imageVector = if (isFavoriteQuestion) {

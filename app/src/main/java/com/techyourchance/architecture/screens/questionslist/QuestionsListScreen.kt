@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.techyourchance.architecture.screens.common.composable.QuestionItem
 
@@ -27,7 +28,7 @@ fun QuestionsListScreen(
     modifier: Modifier = Modifier,
 ) {
 
-    val viewModel: QuestionListViewModel = viewModel()
+    val viewModel: QuestionListViewModel = hiltViewModel()
     val questions = viewModel.lastActiveQuestions.collectAsState()
 
     LaunchedEffect(Unit) {

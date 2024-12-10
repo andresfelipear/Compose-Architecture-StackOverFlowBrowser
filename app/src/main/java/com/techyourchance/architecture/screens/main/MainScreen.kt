@@ -18,10 +18,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.techyourchance.architecture.common.database.FavoriteQuestionDao
 import com.techyourchance.architecture.screens.Route
 import com.techyourchance.architecture.screens.ScreensNavigator
 import com.techyourchance.architecture.screens.favoritequestions.FavoriteQuestionsScreen
@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.map
 
 @Composable
 fun MainScreen(
-        favoriteQuestionDao: FavoriteQuestionDao,
+    mainViewModel: MainViewModel = hiltViewModel(),
 )
 {
     val screensNavigator = remember {
@@ -65,8 +65,8 @@ fun MainScreen(
     if(isShowFavoriteButton.value && questionIdAndTitle.first.isNotEmpty())
     {
         LaunchedEffect(questionIdAndTitle) {
-            favoriteQuestionDao.observeById(questionIdAndTitle.first).collect { favoriteQuestion ->
-                isFavoriteQuestion = favoriteQuestion != null
+            mainViewModel.isQuestionFavorite(questionIdAndTitle.first).collect{
+                isFavoriteQuestion = it
             }
         }
     }
@@ -74,11 +74,12 @@ fun MainScreen(
     Scaffold(
         topBar = {
             MyTopAppBar(
-                favoriteQuestionDao = favoriteQuestionDao,
                 isRootRoute = isRootRoute.value,
                 isShowFavoriteButton = isShowFavoriteButton.value,
                 isFavoriteQuestion = isFavoriteQuestion,
-                questionIdAndTitle = questionIdAndTitle,
+                onToggleFavoriteClicked = {
+                    mainViewModel.toggleFavoriteQuestion(questionIdAndTitle.first, questionIdAndTitle.second)
+                },
                 onBackClicked = {
                     screensNavigator.navigateBack()
                 }

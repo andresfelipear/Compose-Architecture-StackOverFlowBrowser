@@ -1,0 +1,22 @@
+package com.techyourchance.architecture.question
+
+import com.techyourchance.architecture.common.database.FavoriteQuestionDao
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+class ToggleFavoriteQuestionUseCase @Inject constructor(
+    private val favoriteQuestionDao: FavoriteQuestionDao
+){
+    @OptIn(DelicateCoroutinesApi::class)
+    fun toggleFavoriteQuestion(questionId: String, questionTitle: String) {
+        GlobalScope.launch {
+            if (favoriteQuestionDao.getById(questionId) != null) {
+                favoriteQuestionDao.delete(questionId)
+            } else {
+                favoriteQuestionDao.upsert(FavoriteQuestion(questionId, questionTitle))
+            }
+        }
+    }
+}
