@@ -19,17 +19,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun QuestionDetailsScreen(
-    viewModelFactory: ViewModelProvider.Factory,
+    viewModel: QuestionDetailsViewModel = hiltViewModel(),
     questionId: String,
     onError: () -> Unit,
 ) {
 
-    val viewModel: QuestionDetailsViewModel = viewModel(factory = viewModelFactory)
     val questionDetailsResult = viewModel.questionDetails.collectAsState().value
 
     LaunchedEffect(questionId) {
